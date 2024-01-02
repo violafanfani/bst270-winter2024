@@ -1,7 +1,7 @@
 ### Welcome to BST 270: Reproducible Data Science
 
 Instructor: Viola Fanfani (vfanfani@hsph.harvard.edu)
-TFs: Michael Cork (michaelcork@g.harvard.edu)
+TFs: Raphael Kim (raphaelkim@fas.harvard.edu)
 
 January 8-12, 16-18, 9am-12pm
 
