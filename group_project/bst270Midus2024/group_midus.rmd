@@ -1,6 +1,6 @@
 ---
 title: "group_midus"
-output: group_midus
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 You can include R code in the document as follows:
 
 ```{r, include=FALSE}
-source("my_read_rda.r", local = knitr::knit_global())
+source("R/my_read_rda.R", local = knitr::knit_global())
 ```
 
 ## Introduction
@@ -36,6 +36,7 @@ library(ggplot2)
 ```
 
 ```{r}
+if (!require('devtools')) install.packages('devtools')
 devtools::document()
 ```
 
@@ -44,8 +45,8 @@ First we load the data. 29282-0001-Data contains the analysis associated data,
 while 04652-0001-Data contains the midus clinical data
 ```{r}
 getwd()
-read_rda('midus_data_icpsr_29282_20221222/DS0001/29282-0001-Data.rda')
-read_rda('midus_data_icpsr_04652_20221222/DS0001/04652-0001-Data.rda')
+load('data/29282-0001-Data.rda')
+load('data/04652-0001-Data.rda')
 ```
 
 Here are the columns of interest
