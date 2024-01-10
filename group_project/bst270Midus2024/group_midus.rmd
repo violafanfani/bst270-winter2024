@@ -13,6 +13,9 @@ You can include R code in the document as follows:
 
 ```{r, include=FALSE}
 source("R/my_read_rda.R", local = knitr::knit_global())
+source("R/filter_lipid.R")
+source("R/filter_confounders.R")
+source("R/filter_pathway.R")
 ```
 
 ## Introduction
@@ -69,9 +72,24 @@ data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix 
 
 ## Filter data
 
+### Step 1 Filter lipid measurements
+We will focus on 24 columns of our interests and drop rows with missing values in "B4BCHOL", "B4BTRIGL", "B4BHDL" and "B4BLDL" columns.
 ```{r}
-data_oi = data %>% select(all_columns)
-nrow(data_oi %>% drop_na())
+data_after_fl = data %>% select(all_columns) %>% ## 5415 columns -> 24 columns
+  filter_lipid()
+nrow(data_after_fl)
+```
+
+### Step 2 Filter potential confounders
+```{r}
+data_after_fc = data_after_fl %>% filter_lipid()
+nrow(data_after_fc)
+```
+
+### Step 3 Filter pathway variables
+```{r}
+data_after_fp = data_after_fl %>% filter_pathway()
+nrow(data_after_fp)
 ```
 
 
