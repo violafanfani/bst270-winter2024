@@ -83,7 +83,7 @@ nrow(data_after_fl)
 
 ### Step 2 Filter potential confounders
 ```{r}
-data_after_fc = data_after_fl %>% filter_lipid()
+data_after_fc = data_after_fl %>% filter_confounders()
 nrow(data_after_fc)
 ```
 
