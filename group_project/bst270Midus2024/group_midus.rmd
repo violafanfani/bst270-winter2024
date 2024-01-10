@@ -53,18 +53,6 @@ load('data/29282-0001-Data.rda')
 load('data/04652-0001-Data.rda')
 ```
 
-Here are the columns of interest
-```{r}
-optimism_columns = c('B1SE10F', 'B1SE10D', 'B1SE10B', 'B1SE10E', 'B1SE10C', 'B1SE10A')
-group1_columns = c('B1SE10F', 'B1SE10D', 'B1SE10B', 'B1SE10E', 'B1SE10C', 'B1SE10A','B4BCHOL','B4BHDL','B4BLDL','B4BTRIGL','B1PAGE_M2','B1PRSEX','B1PF7A')
-
-group1_columns = c('B1SORIEN','B4BCHOL','B4BHDL','B4BLDL','B4BTRIGL','B1PAGE_M2','B1PRSEX','B1PF7A')
-group2_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
-group3_columns = c('B4H21','B4H22','B4H23A','B4H23C','B4H20','B4H23B','B4H24')
-
-all_columns = c(group1_columns, group2_columns, group3_columns)
-```
-'B1PA24B', 'B4H26A', 'B4H36'
 We have to merge the two tables based on the MIDUS II ID number
 
 ```{r}
@@ -76,8 +64,7 @@ data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix 
 ### Step 1 Filter lipid measurements
 We will focus on 24 columns of our interests and drop rows with missing values in "B4BCHOL", "B4BTRIGL", "B4BHDL" and "B4BLDL" columns.
 ```{r}
-data_after_fl = data %>% select(all_columns) %>% ## 5415 columns -> 24 columns
-  filter_lipid()
+data_after_fl = data %>% filter_lipid()
 nrow(data_after_fl)
 ```
 
