@@ -71,7 +71,8 @@ data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix 
 
 ```{r}
 data_oi = data %>% select(all_columns)
-nrow(data_oi %>% drop_na())
+my_columns = c('B1SORIEN','B4BCHOL','B4BHDL','B4BLDL','B4BTRIGL','B1PAGE_M2','B1PRSEX','B1PF7A','B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF','B4H21','B4H22','B4H23A','B4H23C','B4H20','B4H23B','B4H24')
+data_oi = data_oi %>% select(my_columns)
 ```
 
 
