@@ -68,13 +68,14 @@ gen_fig1 <- function(df){
   )
   
   
-  # Plot scores
+  # Plot scores, note that x axis label will also print number of rows after temoving NA optimism scores
   fig1 <- df %>% filter(!is.na(optimism)) %>%
     ggplot(aes(as.factor(optimism), fill = optimism_cat)) + 
-    geom_bar() + xlab("Optimism Score") + ylab("Frequency") + theme(legend.position="none")
+    geom_bar() + xlab(paste0("Optimism Score (n = ", nrow(df[!is.na(df$optimism),]), ")")) + ylab("Frequency") + theme(legend.position="none")
   
   # Output plot
   fig1
 }
 
-gen_fig1(midus)
+# Display test output
+#gen_fig1(midus)
