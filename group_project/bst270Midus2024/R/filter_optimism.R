@@ -6,7 +6,7 @@
 #' df_optimism <- filter_optimism(df_raw)
 filter_optimism <- function(df) {
   # Specify optimism measurement columns
-  optimism_meas_columns <- c('B1SE10F', 'B1SE10D', 'B1SE10B', 'B1SE10E', 'B1SE10C', 'B1SE10A')
+  optimism_meas_columns <- 'B1SORIEN'
   
   # Drop rows with NA values in the lipid measurement columns
   res <- df %>%
