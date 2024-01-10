@@ -16,6 +16,7 @@ source("R/my_read_rda.R", local = knitr::knit_global())
 source("R/filter_lipid.R")
 source("R/filter_confounders.R")
 source("R/filter_pathway.R")
+source("R/filter_optimism.R")
 ```
 
 ## Introduction
@@ -88,10 +89,15 @@ nrow(data_after_fc)
 
 ### Step 3 Filter pathway variables
 ```{r}
-data_after_fp = data_after_fl %>% filter_pathway()
+data_after_fp = data_after_fc %>% filter_pathway()
 nrow(data_after_fp)
 ```
 
+### Step 4 Filter optimism variables
+```{r}
+data_after_fo = data_after_fp %>% filter_optimism()
+nrow(data_after_fo)
+```
 
 
 ## Figure 1
