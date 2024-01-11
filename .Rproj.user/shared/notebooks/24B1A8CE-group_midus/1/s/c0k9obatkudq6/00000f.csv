@@ -1,0 +1,8 @@
+"0","confounder_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')"
+"0",""
+"0","data_after_fc = filter_confounders(data_after_fl, confounder_columns)"
+"0","nrow(data_after_fc)"
+"1","[1]"
+"1"," 1012"
+"1","
+"
