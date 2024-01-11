@@ -7,7 +7,7 @@
 filter_lipid(df)
 }
 \arguments{
-\item{dat}{A dataframe.}
+\item{df}{A dataframe.}
 }
 \description{
 Clean and filter lipid measurements.
