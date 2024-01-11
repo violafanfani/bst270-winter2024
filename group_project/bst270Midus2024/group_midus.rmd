@@ -15,7 +15,7 @@ You can include R code in the document as follows:
 source("R/my_read_rda.R", local = knitr::knit_global())
 source("R/filter_lipid.R")
 source("R/filter_confounders.R")
-#source("R/filter_pathway.R")
+source("R/filter_pathway.R")
 source("R/filter_optimism.R")
 source("R/fig1plot.R")
 ```
@@ -95,7 +95,7 @@ After filtering for potential confounders, we have 1012 rows left
 
 ### Step 3 Filter pathway variables
 ```{r}
-data_after_fp = data_after_fc %>% filter_pathway()
+data_after_fp = filter_pathway(data_after_fc)
 nrow(data_after_fp)
 ```
 
