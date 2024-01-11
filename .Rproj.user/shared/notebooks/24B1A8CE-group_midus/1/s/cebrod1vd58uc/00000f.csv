@@ -1,6 +1,0 @@
-"0","source(""R/my_read_rda.R"", local = knitr::knit_global())"
-"0","source(""R/filter_lipid.R"")"
-"0","source(""R/filter_confounders.R"")"
-"0","#source(""R/filter_pathway.R"")"
-"0","source(""R/filter_optimism.R"")"
-"0","source(""R/fig1plot.R"")"
