@@ -29,7 +29,7 @@ get_alchol_consumption <- function(dat) {
                                        B4H34 == '(5) Less than one day/week' ~ 0.5,
                                        B4H34 == '(6) Never drinks' ~ 0,
                                        .default = 0),
-                alcohol_consumption=if_else(B4H33 == '(2) No', 0, if_else(alcohol_days==0, 0, B4H36)),
+                alcohol_consumption=if_else(B4H33 == '(2) No', 0, B4H36),
                 alcohol_consumption_adjusted=if_else(alcohol_days==0, 0, B4H36*alcohol_days/7)) 
 }
 
