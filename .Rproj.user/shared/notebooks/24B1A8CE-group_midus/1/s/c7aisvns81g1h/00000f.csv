@@ -1,6 +1,0 @@
-"0","data_after_fo = data %>% filter_optimism()"
-"0","nrow(data_after_fo)"
-"1","[1]"
-"1"," 1050"
-"1","
-"
