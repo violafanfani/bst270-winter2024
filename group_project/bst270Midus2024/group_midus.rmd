@@ -15,8 +15,9 @@ You can include R code in the document as follows:
 source("R/my_read_rda.R", local = knitr::knit_global())
 source("R/filter_lipid.R")
 source("R/filter_confounders.R")
-source("R/filter_pathway.R")
+#source("R/filter_pathway.R")
 source("R/filter_optimism.R")
+source("R/fig1plot.R")
 ```
 
 ## Introduction
@@ -57,33 +58,45 @@ We have to merge the two tables based on the MIDUS II ID number
 
 ```{r}
 data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix = c('','.2'))
+print(dim(data))
 ```
+
+Data has 1054 rows at the beginning after merging the two tables
+
+### Step 0. Filter optimism variables
+```{r}
+data_after_fo = data %>% filter_optimism()
+nrow(data_after_fo)
+```
+
+First, we keep only the rows that have an optimism score and we are left with 1050 rows
 
 ## Filter data
 
 ### Step 1 Filter lipid measurements
 We will focus on 24 columns of our interests and drop rows with missing values in "B4BCHOL", "B4BTRIGL", "B4BHDL" and "B4BLDL" columns.
 ```{r}
-data_after_fl = data %>% filter_lipid()
+
+data_after_fl = data_after_fo %>% filter_lipid()
 nrow(data_after_fl)
 ```
 
+After filtering lipid measurements, we have 1039 rows left
+
 ### Step 2 Filter potential confounders
 ```{r}
-data_after_fc = data_after_fl %>% filter_confounders()
+confounder_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
+
+data_after_fc = filter_confounders(data_after_fl, confounder_columns)
 nrow(data_after_fc)
 ```
+
+After filtering for potential confounders, we have 1012 rows left
 
 ### Step 3 Filter pathway variables
 ```{r}
 data_after_fp = data_after_fc %>% filter_pathway()
 nrow(data_after_fp)
-```
-
-### Step 4 Filter optimism variables
-```{r}
-data_after_fo = data_after_fp %>% filter_optimism()
-nrow(data_after_fo)
 ```
 
 
@@ -96,4 +109,17 @@ with black representing the lowest tertile of optimism (6 to 22),
 gray, middle tertile of optimism (23 to 26), 
 and white, highest tertile of optimism (27 to 30)
 
+In our data the average and standard deviation might be slightly different
+```{r}
+mean(data_after_fc$B1SORIEN)
+sd(data_after_fc$B1SORIEN)
+```
+
+Indeed we have 
+
 Optimism scores are in the 29282-0001-Data object, 
+
+```{r}
+gen_fig1(data_after_fc)
+```
+
