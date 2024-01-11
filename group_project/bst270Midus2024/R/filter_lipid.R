@@ -2,7 +2,7 @@ library(tidyverse)
 
 #' Clean and filter lipid measurements.
 #' 
-#' @param dat A dataframe.
+#' @param df A dataframe.
 #' @examples
 #' df_raw <- data.frame(sample_biomarker_data)
 #' df_lipid <- filter_lipid(df_raw)
