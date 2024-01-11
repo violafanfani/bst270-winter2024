@@ -7,12 +7,12 @@
 filter_optimism(df)
 }
 \arguments{
-\item{dat}{A dataframe.}
+\item{df}{A dataframe.}
 }
 \description{
 Clean and filter optimism measurements.
 }
 \examples{
-df_raw <- data.frame(sample_biomarker_data)
+df_raw <- data.frame(sample_survey_data)
 df_optimism <- filter_optimism(df_raw)
 }
