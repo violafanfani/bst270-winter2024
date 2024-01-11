@@ -5,7 +5,7 @@ table1_function <- function(data_after_fp){
   #c('Education', 'Household_Income', '', 'Chronic_Conditions', 'Smoking', 'Alcohol', 'Regular_Exercise', 
   #  'BMI', '')
   
-  table1_data <- data_after_fc %>% 
+  table1_data <- data_after_fp %>% 
     select_at(vars(intersect(c("M2ID", "M2FAMNUM", "B1SORIEN", group2_columns), names(.)))) %>% 
     mutate(Optimism = case_when(
       B1SORIEN <= 22 ~ "Low",
@@ -13,9 +13,9 @@ table1_function <- function(data_after_fp){
       TRUE ~ "High"
     )) %>% 
     mutate_at(vars(Optimism), ~factor(., levels = c("Low", "Moderate", "High"))) %>% 
-    mutate_at(vars(c(B1SCHROX, B4H26, B4H25)), ~factor(., levels = c("1", "0"))) %>% 
-    mutate_at(vars(B1PB1), ~factor(., levels = c("1", "2",
-                                                 "3", "4")))
+    mutate_at(vars(c(B1SCHROX, B4H26, B4H25)), ~factor(., labels = c("No", "Yes"))) %>% 
+    mutate_at(vars(B1PB1), ~factor(., levels = c("Less than a high school degree", "High school degree",
+                                                 "Some college", "College degree or more")))
   
   labels <- list(
     variables=list(B1PB1="Education",
@@ -39,6 +39,7 @@ table1_function <- function(data_after_fp){
   }
   
   table1 <- table1(strata, labels, render.continuous = my.render.cont, render.categorical = my.render.cat)
+  table1
   return(table1)
 }
 
