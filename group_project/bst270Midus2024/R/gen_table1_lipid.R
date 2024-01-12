@@ -35,10 +35,10 @@ gen_table1_lipid <- function(df) {
     ungroup() %>%
     group_by(optimism_cat) %>%
     summarize(
-      total_chol = paste0(round(mean_chol, digits=2), " ± ", round(sd_chol, digits=2)),
-      hdl_chol = paste0(round(mean_hdl, digits=2), " ± ", round(sd_hdl, digits=2)),
-      ldl_chol = paste0(round(mean_ldl, digits=2), " ± ", round(sd_ldl, digits=2)),
-      trigl = paste0(round(mean_trigl, digits=2), " ± ", round(sd_trigl, digits=2))
+      total_chol = paste0(round(mean_chol, digits=2), '+-', round(sd_chol, digits=2)),
+      hdl_chol = paste0(round(mean_hdl, digits=2), '+-', round(sd_hdl, digits=2)),
+      ldl_chol = paste0(round(mean_ldl, digits=2), '+-', round(sd_ldl, digits=2)),
+      trigl = paste0(round(mean_trigl, digits=2), '+-', round(sd_trigl, digits=2))
     )
   
   sum_stats_lipid <- data.frame(t(lipid_by_opt[c(2, 3, 1),])) %>%

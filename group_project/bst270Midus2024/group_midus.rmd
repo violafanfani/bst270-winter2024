@@ -18,6 +18,7 @@ source("R/filter_confounders.R")
 source("R/filter_pathway.R")
 source("R/filter_optimism.R")
 source("R/fig1plot.R")
+source("R/gen_table1_lipid.R")
 ```
 
 ## Introduction
@@ -33,21 +34,25 @@ Here we attempt to reproduce the findings of [1] and critique the reproducibilit
 ## Data Dictionary
 This manuscript uses several variables from multiple data files. Some of these variables don't have intuitive names and need to be manually looked up either online or in the codebooks provided in the data downloads. We generated a data dictionary to our understanding of the naming conventions.
 
-# Load packages
+Load packages
 ```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 ```
 
+We are trying to keep all functions well documented. This command allows us to have
+package-like documentation for all of the functions.
+
 ```{r}
 if (!require('devtools')) install.packages('devtools')
 devtools::document()
 ```
 
+## Read data
 
-First we load the data. 29282-0001-Data contains the analysis associated data, 
-while 04652-0001-Data contains the midus clinical data
+First we load the data. 29282-0001-Data contains the analysis-associated data, 
+while 04652-0001-Data contains the midus clinical data. 
 ```{r}
 getwd()
 load('data/29282-0001-Data.rda')
@@ -61,50 +66,100 @@ data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix 
 print(dim(data))
 ```
 
-Data has 1054 rows at the beginning after merging the two tables
+Data has 1054 rows at the beginning after merging the two tables. 
+Now we are going to try and reproduce the preprocessing steps such that we can 
+obtain the 990 individuals they used for the paper analysis.
+
+## Wrangle data
 
 ### Step 0. Filter optimism variables
+
+Optimism is assessed using the 6-item Life-Orientation test. In the codebook we have
+found that the B1SORIEN column contains the test value, already processed as 
+explained in the paper while columns ('B1SORIEN','B1SE10A', 'B1SE10B', 'B1SE10C', 'B1SE10D', 'B1SE10E','B1SE10F')
+contain the single item scores.
+
+Here we are filtering the rows to remove the individuals
+who do not have an optimism score.
+
 ```{r}
 data_after_fo = data %>% filter_optimism()
 nrow(data_after_fo)
 ```
 
-First, we keep only the rows that have an optimism score and we are left with 1050 rows
+We are left with 1050 samples. 
+However, by visually inspecting the table we can see that for some patients, 
+although we have a B1SORIEN value, some of the items are reported as NAs. 
+This seems weird, we do not understand how they computed the final score, 
+hence we proceed to remove also these patients.
 
-## Filter data
+```{r}
+
+optimism_columns <- c('B1SORIEN','B1SE10A', 'B1SE10B', 'B1SE10C', 'B1SE10D', 'B1SE10E','B1SE10F')
+data_after_fo2 <- data_after_fo %>%
+    drop_na(any_of(optimism_columns))
+nrow(data_after_fo2)
+```
+
+We are left with 1041 samples.
+
+Secondly, we clean the columns relative to lipids (Total cholesterol, HDL, LDL, triglicerydes).
 
 ### Step 1 Filter lipid measurements
 We will focus on 24 columns of our interests and drop rows with missing values in "B4BCHOL", "B4BTRIGL", "B4BHDL" and "B4BLDL" columns.
 ```{r}
-
-data_after_fl = data_after_fo %>% filter_lipid()
+lipid_columns = c("B4BCHOL", "B4BTRIGL", "B4BHDL", "B4BLDL")
+data_after_fl = data_after_fo2 %>% filter_lipid()
 nrow(data_after_fl)
 ```
 
-After filtering lipid measurements, we have 1039 rows left
+After filtering lipid measurements, we have 1030 rows left
 
-### Step 2 Filter potential confounders
+We also have to clean and filter the pathway variables which are those relative to lifestyle
+and concern drinking, smoking and diet.
+
+### Step 2 Filter pathway variables
+```{r}
+
+data_after_fp = filter_pathway(data_after_fl)
+nrow(data_after_fp)
+pathway_columns = c("B4PBMI", "alcohol_consumption", "smoking_status", "reg_exercise","score_sum")
+```
+
+We are left with 1020 samples. This filtering was tricky because we found that
+many choices are not adequately explained in the paper: what columns are used for 
+the drinking habits? 
+
+### Step 3 Filter potential confounders
+Finally we filter the potential confounders, such as age, sex, income..
+
 ```{r}
 confounder_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
 
-data_after_fc = filter_confounders(data_after_fl, confounder_columns)
+data_after_fc = filter_confounders(data_after_fp, confounder_columns)
 nrow(data_after_fc)
 ```
 
-After filtering for potential confounders, we have 1012 rows left
+Here we are left with 994 individuals, 4 more than those reported in the paper.
 
-### Step 3 Filter pathway variables
+Although we are not able to completely reproduce the data wrangling steps, 
+we are now going to reproduce some of the figures and tables and assess whether the 
+general trends reported in the paper are robust to this slight change in the population 
+make-up.
+
+Let's keep only the columns of interest
 ```{r}
-data_after_fp = filter_pathway(data_after_fc)
-nrow(data_after_fp)
+all_columns = c(optimism_columns, lipid_columns, pathway_columns, confounder_columns)
+View(data_after_fc[,all_columns])
 ```
+
 
 
 ## Figure 1
 
 First, we attempt to reproduce Figure 1. 
 Figure 1 shows the frequency distribution of 990 optimism scores 
-(mean +- SD: 23.05 +- 4.69), 
+(mean +- SD: 23.95 +- 4.69), 
 with black representing the lowest tertile of optimism (6 to 22), 
 gray, middle tertile of optimism (23 to 26), 
 and white, highest tertile of optimism (27 to 30)
@@ -115,11 +170,22 @@ mean(data_after_fc$B1SORIEN)
 sd(data_after_fc$B1SORIEN)
 ```
 
-Indeed we have 
+Indeed we have a slight deviation in mean, that is now 23.91 vs the 23.05 reported in the table. 
+Standard deviation is instead consistent with what was reported.
 
-Optimism scores are in the 29282-0001-Data object, 
 
 ```{r}
 gen_fig1(data_after_fc)
+```
+The histogram of the optimism scores seems to be slightly different, for instance 
+there seem to be more samples with score 22.
+
+## Table 1
+
+We then proceed to reproduce table 1. We are gonna split it in different chunks, 
+based on the lipid/confounder/pathway groups.
+
+```{r}
+gen_table1_lipid(data_after_fc)
 ```
 
