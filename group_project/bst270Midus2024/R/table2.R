@@ -1,6 +1,8 @@
 library(table1)
 library(gt)
 
+get_table2_confounders <- function(data_after_fc){
+
 group2_columns <- c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
 
 table1_data <- data_after_fc %>% 
@@ -59,5 +61,6 @@ table2 <- data.frame("Characteristic" = c("Education", "Household Income","LAG",
                      "r" = vector_cors)
 gt(table2) %>% 
   tab_header(title = "Correlation Coefficients for optimism and confounders") 
-  
+return(table2)
+}
 
