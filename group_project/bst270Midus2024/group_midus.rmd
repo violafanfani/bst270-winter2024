@@ -1,19 +1,44 @@
 ---
 title: "group_midus"
-output: group_midus
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Including Code
+## Dependencies
 
-You can include R code in the document as follows:
+This notebook can be reproduced by installing the following R packages:
+- knitr
+- janitor
+- dplyr
+- tidyverse
+- ggplot2
+- DT
+- tableone
+- table1
+- gt
+
 
 ```{r, include=FALSE}
-source("my_read_rda.r", local = knitr::knit_global())
+source("R/my_read_rda.R", local = knitr::knit_global())
+source("R/filter_lipid.R")
+source("R/filter_confounders.R")
+source("R/filter_pathway.R")
+source("R/filter_optimism.R")
+source("R/fig1plot.R")
+source("R/gen_table1_lipid.R")
+source("R/gen_table1_pathway.R")
+source("R/table1.R")
+source("R/table2.R")
+source("R/gen_table2.R")
 ```
+
+# Reproducibility group project, BST270 2024
+
 
 ## Introduction
 In this Rmarkdown file we will attempt to reproduce the figures, tables and analyses presented in the paper [_Relation between Optimism and Lipids in Midlife_.](https://www.ajconline.org/article/S0002-9149(13)00388-3/pdf)
@@ -23,54 +48,129 @@ http://doi.org/10.1016/j.amjcard.2013.01.292
 
 In 1995, MIDUS survey data were collected from a total of 7,108 participants. The baseline sample was comprised of individuals from four subsamples: (1) a national RDD (random digit dialing) sample ($n = 3,487$); (2) oversamples from five metropolitan areas in the U.S. ($n = 757$); (3) siblings of individuals from the RDD sample ($n = 950$); and (4) a national RDD sample of twin pairs ($n = 1,914$). All eligible participants were non-institutionalized, English-speaking adults in the contiguous United States, aged 25 to 74. All respondents were invited to participate in a phone interview of approximately 30 minutes in length and complete 2 self-administered questionnaires (SAQs), each of approximately 45 pages in length. In addition, the twin subsample was administered a short screener to assess zygosity and other twin-specific information. With funding provided by the National Institute on Aging, a longitudinal follow-up of MIDUS I began in 2004. Every attempt was made to contact all original respondents and invite them to participate in a second wave of data collection. Of the 7,108 participants in MIDUS I, 4,963 were successfully contacted to participate in another phone interview of about 30 minutes in length. MIDUS II also included two self-administered questionnaires (SAQs), each of about 55 pages in length, which were mailed to participants. The overall response rate for the SAQs was 81\%. Over 1,000 journal articles have been written using MIDUS I and II data since 1995.
 
-Here we attempt to reproduce the findings of [1] and critique the reproducibility of the article. This particular article focuses only on MIDUS II data, including biomarker data, and investigates the relationship between optimism and lipids. The MIDUS II data and supporting codebook and other documents can be downloaded \href{https://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/4652?archive=ICPSR&q=MIDUS+}{here}. The data can be downloaded in multiple formats. Here we use the R data files and perform all data cleaning and analyses in R version 3.5.1. The biomarker data can be downloaded \href{https://www.icpsr.umich.edu/icpsrweb/NACDA/studies/29282}{here}.
+Here we attempt to reproduce the findings of [1] and critique the reproducibility of the article. This particular article focuses only on MIDUS II data, including biomarker data, and investigates the relationship between optimism and lipids. The MIDUS II data and supporting codebook and other documents can be downloaded \href{https://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/4652?archive=ICPSR&q=MIDUS+}{here}. The data can be downloaded in multiple formats. The biomarker data can be downloaded \href{https://www.icpsr.umich.edu/icpsrweb/NACDA/studies/29282}{here}.
 
 ## Data Dictionary
 This manuscript uses several variables from multiple data files. Some of these variables don't have intuitive names and need to be manually looked up either online or in the codebooks provided in the data downloads. We generated a data dictionary to our understanding of the naming conventions.
 
-# Load packages
+Load packages
 ```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(DT)
 ```
 
+We are trying to keep all functions well documented. This command allows us to have
+package-like documentation for all of the functions.
+
 ```{r}
+if (!require('devtools')) install.packages('devtools')
 devtools::document()
 ```
 
+## Read data
 
-First we load the data. 29282-0001-Data contains the analysis associated data, 
-while 04652-0001-Data contains the midus clinical data
+First we load the data. 29282-0001-Data contains the analysis-associated data, 
+while 04652-0001-Data contains the midus clinical data. 
 ```{r}
 getwd()
-read_rda('midus_data_icpsr_29282_20221222/DS0001/29282-0001-Data.rda')
-read_rda('midus_data_icpsr_04652_20221222/DS0001/04652-0001-Data.rda')
+load('data/29282-0001-Data.rda')
+load('data/04652-0001-Data.rda')
 ```
 
-Here are the columns of interest
-```{r}
-optimism_columns = c('B1SE10F', 'B1SE10D', 'B1SE10B', 'B1SE10E', 'B1SE10C', 'B1SE10A')
-group1_columns = c('B1SE10F', 'B1SE10D', 'B1SE10B', 'B1SE10E', 'B1SE10C', 'B1SE10A','B4BCHOL','B4BHDL','B4BLDL','B4BTRIGL','B1PAGE_M2','B1PRSEX','B1PF7A')
-
-group1_columns = c('B1SORIEN','B4BCHOL','B4BHDL','B4BLDL','B4BTRIGL','B1PAGE_M2','B1PRSEX','B1PF7A')
-group2_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
-group3_columns = c('B4H21','B4H22','B4H23A','B4H23C','B4H20','B4H23B','B4H24')
-
-all_columns = c(group1_columns, group2_columns, group3_columns)
-```
-'B1PA24B', 'B4H26A', 'B4H36'
 We have to merge the two tables based on the MIDUS II ID number
 
 ```{r}
 data = inner_join(da04652.0001, da29282.0001, by = c("M2ID", "M2FAMNUM"),suffix = c('','.2'))
+print(dim(data))
 ```
 
-## Filter data
+Data has 1054 rows at the beginning after merging the two tables. 
+Now we are going to try and reproduce the preprocessing steps such that we can 
+obtain the 990 individuals they used for the paper analysis.
+
+## Wrangle data
+
+### Step 0. Filter optimism variables
+
+Optimism is assessed using the 6-item Life-Orientation test. In the codebook we have
+found that the B1SORIEN column contains the test value, already processed as 
+explained in the paper while columns ('B1SORIEN','B1SE10A', 'B1SE10B', 'B1SE10C', 'B1SE10D', 'B1SE10E','B1SE10F')
+contain the single item scores.
+
+Here we are filtering the rows to remove the individuals
+who do not have an optimism score.
 
 ```{r}
-data_oi = data %>% select(all_columns)
-nrow(data_oi %>% drop_na())
+data_after_fo = data %>% filter_optimism()
+nrow(data_after_fo)
+```
+
+We are left with 1050 samples. 
+However, by visually inspecting the table we can see that for some patients, 
+although we have a B1SORIEN value, some of the items are reported as NAs. 
+This seems weird, we do not understand how they computed the final score, 
+hence we proceed to remove also these patients.
+
+```{r}
+
+optimism_columns <- c('B1SORIEN','B1SE10A', 'B1SE10B', 'B1SE10C', 'B1SE10D', 'B1SE10E','B1SE10F')
+data_after_fo2 <- data_after_fo %>%
+    drop_na(any_of(optimism_columns))
+nrow(data_after_fo2)
+```
+
+We are left with 1041 samples.
+
+Secondly, we clean the columns relative to lipids (Total cholesterol, HDL, LDL, triglicerydes).
+
+### Step 1 Filter lipid measurements
+We will focus on 24 columns of our interests and drop rows with missing values in "B4BCHOL", "B4BTRIGL", "B4BHDL" and "B4BLDL" columns.
+```{r}
+lipid_columns = c("B4BCHOL", "B4BTRIGL", "B4BHDL", "B4BLDL")
+data_after_fl = data_after_fo2 %>% filter_lipid()
+nrow(data_after_fl)
+```
+
+After filtering lipid measurements, we have 1030 rows left
+
+We also have to clean and filter the pathway variables which are those relative to lifestyle
+and concern drinking, smoking and diet.
+
+### Step 2 Filter pathway variables
+```{r}
+
+data_after_fp = filter_pathway(data_after_fl)
+nrow(data_after_fp)
+pathway_columns = c("B4PBMI", "alcohol_consumption", "smoking_status", "reg_exercise","score_sum")
+```
+
+We are left with 1020 samples. This filtering was tricky because we found that
+many choices are not adequately explained in the paper: what columns are used for 
+the drinking habits? 
+
+### Step 3 Filter potential confounders
+Finally we filter the potential confounders, such as age, sex, income..
+
+```{r}
+confounder_columns = c('B1PB1','B1STINC1','B4ZB1SLG','B1SCHROX','B4H26','B4H33','B4H25','B4PBMI','B1SNEGAF')
+
+data_after_fc = filter_confounders(data_after_fp, confounder_columns)
+nrow(data_after_fc)
+```
+
+Here we are left with 994 individuals, 4 more than those reported in the paper.
+
+Although we are not able to completely reproduce the data wrangling steps, 
+we are now going to reproduce some of the figures and tables and assess whether the 
+general trends reported in the paper are robust to this slight change in the population 
+make-up.
+
+Let's keep only the columns of interest
+```{r}
+all_columns = c(optimism_columns, lipid_columns, pathway_columns, confounder_columns)
+#View(data_after_fc[,all_columns])
 ```
 
 
@@ -79,9 +179,90 @@ nrow(data_oi %>% drop_na())
 
 First, we attempt to reproduce Figure 1. 
 Figure 1 shows the frequency distribution of 990 optimism scores 
-(mean +- SD: 23.05 +- 4.69), 
+(mean +- SD: 23.95 +- 4.69), 
 with black representing the lowest tertile of optimism (6 to 22), 
 gray, middle tertile of optimism (23 to 26), 
 and white, highest tertile of optimism (27 to 30)
 
-Optimism scores are in the 29282-0001-Data object, 
+In our data the average and standard deviation might be slightly different
+```{r}
+mean(data_after_fc$B1SORIEN)
+sd(data_after_fc$B1SORIEN)
+```
+
+Indeed we have a slight deviation in mean, that is now 23.91 vs the 23.05 reported in the table. 
+Standard deviation is instead consistent with what was reported.
+
+
+```{r}
+gen_fig1(data_after_fc)
+```
+The histogram of the optimism scores seems to be slightly different, for instance 
+there seem to be more samples with score 22.
+
+## Table 1
+
+We then proceed to reproduce table 1. We are gonna split it in different chunks, 
+based on the lipid/confounder/pathway groups.
+
+```{r}
+gen_table1_lipid(data_after_fc)
+```
+
+
+
+We also reproduce the table for the pathway variables
+```{r}
+
+gen_table1_pathway(data_after_fc)
+```
+
+Finally we reproduce the table for the confounders
+```{r}
+table1_function(data_after_fc)
+```
+
+```{r}
+gen_table2(data_after_fc)
+```
+
+```{r}
+get_table2_confounders(data_after_fc)
+```
+
+
+## Critique of this study reproducibility
+
+1. Is the data publicly available?
+   Yes
+ 
+2. Is the data easy/intuitive to access?
+  Yes
+
+3. Is there a codebook and/or instructions about how the data and documentation is organized?
+    Yes, but it was not always clear
+
+4. Are the file names intuitive?
+    No
+    
+5. Are the variable names intuitive?
+   No
+6. Is the software used for analysis publicly available?
+   No, they use SAS v9.2 that is not available, and they do not give details of what they did on SAS
+7. If the software is available, is it well commented?
+   No
+8. Is there a toy example provided?
+    No
+9.  Are you able to reproduce the figures, tables and results presented in the paper?
+    The variables seem to be all there, but we had a hard time matching them 1-1 with what was done in the paper.
+    We got to 994 samples, instead of 990 and for some of the variables it looks like we have different distributions of
+    the values.
+
+10. Was there anything you think should have been made clearer, or explained in a different way?
+    
+11. Did you find any faults in the methods used in this paper? Would you have used more or different methods?
+    The alcohol consumption, reported as drinks/week, but based on the reproduction steps it looks like they use
+    drinks/day of drinking.
+    The blood pressure medication variables were not clear
+    We did not understand if the lipid levels had to be corrected, or were already corrected in the dataset
+
