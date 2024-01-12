@@ -19,6 +19,7 @@ source("R/filter_pathway.R")
 source("R/filter_optimism.R")
 source("R/fig1plot.R")
 source("R/gen_table1_lipid.R")
+source("R/gen_table2.R")
 ```
 
 ## Introduction
@@ -39,6 +40,7 @@ Load packages
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(DT)
 ```
 
 We are trying to keep all functions well documented. This command allows us to have
@@ -189,4 +191,7 @@ based on the lipid/confounder/pathway groups.
 gen_table1_lipid(data_after_fc)
 ```
 
+```{r}
+gen_table2(data_after_fc)
+```
 
