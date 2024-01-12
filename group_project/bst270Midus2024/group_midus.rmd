@@ -19,6 +19,9 @@ source("R/filter_pathway.R")
 source("R/filter_optimism.R")
 source("R/fig1plot.R")
 source("R/gen_table1_lipid.R")
+source("R/gen_table1_pathway.R")
+source("R/table1.R")
+source("R/table2.R")
 ```
 
 ## Introduction
@@ -188,5 +191,19 @@ based on the lipid/confounder/pathway groups.
 ```{r}
 gen_table1_lipid(data_after_fc)
 ```
+
+
+
+We also reproduce the table for the pathway variables
+```{r}
+
+gen_table1_pathway(data_after_fc)
+```
+
+Finally we reproduce the table for the confounders
+```{r}
+gen_table1_confounders(data_after_fc)
+```
+
 
 
