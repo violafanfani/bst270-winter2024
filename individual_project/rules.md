@@ -7,6 +7,8 @@ should be shared on GitHub with appropriate documentation.
 
 Send an email to Viola and Raphael by **Monday January 22nd** with the name of the repo.
 
+Check out one of 2023 projects: [Chris Covington](https://github.com/ctcovington/BST_270_project)
+
 ## Choice of article
 
 Choose one of the articles from FiveThirtyEight ([https://data.fivethirtyeight.com/](https://data.fivethirtyeight.com/))
